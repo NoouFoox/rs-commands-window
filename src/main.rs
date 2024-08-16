@@ -18,17 +18,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             commands.push(command);
         }
     }
-    for command in commands{
-        let handle = thread::spawn(move || {
+    for command in commands {
+        thread::spawn(move || {
             println!("{}: {}", command.name, command.content);
             Command::new("osascript")
-            .arg("-e")
-            .arg(format!("tell application \"Terminal\" to do script \"{}\"", command.content))
-            .spawn()
-        });
-        handle.join().unwrap()?;
+                .arg("-e")
+                .arg(format!(
+                    "tell application \"Terminal\" to do script \"{}\"",
+                    command.content
+                ))
+                .output()
+        })
+        .join()
+        .unwrap()?;
     }
-    Ok(())
+    loop {}
 }
 pub fn read_config<P: AsRef<std::path::Path>>(
     path: P,
